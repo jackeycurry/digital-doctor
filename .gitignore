@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build outputs
+dist/
+backend/dist/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# SSL certificates
+certs/
+*.pem
+*.crt
+*.key
+
+# Large binary files (keep the small GLB, exclude large ones)
+*.glb
+!6402f01d4a55470b8045461b290f2ffd.glb
+
+# Temporary directories
+__MACOSX/
+Windows_iat1226_tts_online1226_06d258bd/
+bin/
+include/
+libs/
+samples/
+doc/
+docs/
+"【CG】亲和活力风白大褂女医护俯身互动形象 3D 模型_original_564136"/
+
+# Subdirectories that are separate projects
+digital-doctor/
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
