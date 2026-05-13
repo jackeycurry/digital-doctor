@@ -43,6 +43,11 @@
   --radius-lg: 24px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --backdrop-blur: blur(20px) saturate(160%);
+  /* Blue theme (for auth pages) */
+  --blue-primary: #2563eb;
+  --blue-dark: #1d4ed8;
+  --blue-light: #3b82f6;
+  --blue-bg: #f0f4fb;
 }
 
 body {
