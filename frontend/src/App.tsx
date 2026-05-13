@@ -12,9 +12,19 @@ import { useStreamingAudio } from './hooks/useStreamingAudio'
 import { useStt } from './hooks/useStt'
 import { useLipSync } from './components/LipSyncController'
 import type { ServerMessage, ChatMessage } from './types'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
 
 
 export default function App() {
+  const [route, setRoute] = useState<'login' | 'register' | 'main'>(() => {
+    const saved = sessionStorage.getItem('dd_auth')
+    if (saved) return 'main'
+    const params = new URLSearchParams(window.location.search)
+    if (params.has('registered')) return 'login'
+    return 'login'
+  })
+
   const { sendMessage, onMessage, state, connected } = useWebSocket()
   const { startRecording, stopRecording, isRecording, onChunk } = useAudioCapture()
   const { enqueueChunk, finishStream, stopPlayback, getAnalyserNode } = useStreamingAudio()
@@ -437,6 +447,31 @@ export default function App() {
   // ============================================================
   // Render
   // ============================================================
+  if (route !== 'main') {
+    if (route === 'login') {
+      return (
+        <LoginPage
+          onLogin={(phone) => {
+            sessionStorage.setItem('dd_auth', JSON.stringify({ phone, token: 'logged_in' }))
+            setRoute('main')
+          }}
+          onGoRegister={() => setRoute('register')}
+        />
+      )
+    }
+    // route === 'register'
+    return (
+      <RegisterPage
+        onSuccess={() => {
+          window.location.search = '?registered=true'
+          setRoute('login')
+        }}
+        onBack={() => setRoute('login')}
+      />
+    )
+  }
+
+  // route === 'main': render existing app UI
   return showVideoCallPage ? (
     <VideoCallPage
       videoStream={videoStream}
