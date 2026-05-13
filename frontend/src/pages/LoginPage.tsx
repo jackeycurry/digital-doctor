@@ -2,7 +2,7 @@ import { useState } from 'react'
 import './LoginPage.css'
 
 interface Props {
-  onLogin: (phone: string) => void
+  onLogin: (phone: string, token: string) => void
   onGoRegister: () => void
 }
 
@@ -39,7 +39,7 @@ export default function LoginPage({ onLogin, onGoRegister }: Props) {
       if (!res.ok) {
         setError(data.error || '登录失败')
       } else {
-        onLogin(phone)
+        onLogin(data.phone, data.token)
       }
     } catch {
       setError('网络错误，请重试')

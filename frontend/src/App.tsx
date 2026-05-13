@@ -451,8 +451,8 @@ export default function App() {
     if (route === 'login') {
       return (
         <LoginPage
-          onLogin={(phone) => {
-            sessionStorage.setItem('dd_auth', JSON.stringify({ phone, token: 'logged_in' }))
+          onLogin={(phone, token) => {
+            sessionStorage.setItem('dd_auth', JSON.stringify({ phone, token }))
             setRoute('main')
           }}
           onGoRegister={() => setRoute('register')}
