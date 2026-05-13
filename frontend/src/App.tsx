@@ -11,7 +11,9 @@ import { useAudioCapture } from './hooks/useAudioCapture'
 import { useStreamingAudio } from './hooks/useStreamingAudio'
 import { useStt } from './hooks/useStt'
 import { useLipSync } from './components/LipSyncController'
-import type { ServerMessage, ChatMessage } from './types'
+import ChatSidebar from './components/ChatSidebar'
+import { useChatSessions } from './hooks/useChatSessions'
+import type { ServerMessage } from './types'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 
@@ -35,8 +37,20 @@ export default function App() {
     sendTextRef.current(text)
   })
 
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [partialText, setPartialText] = useState('')
+  const {
+  sessions,
+  currentSession,
+  currentSessionId,
+  addUserMessage,
+  addAssistantMessage,
+  switchToSession,
+  deleteSession,
+  ensureSession,
+} = useChatSessions()
+
+const messages = currentSession?.messages ?? []
+
+const [partialText, setPartialText] = useState('')
   const [inCall, setInCall] = useState(false)
   const [callRecording, setCallRecording] = useState(true) // mic on/off state
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null)
@@ -59,6 +73,8 @@ export default function App() {
 
   // Auto-commit accumulated text if no audio arrives for 5 seconds
   // This handles the case where response_done gets lost due to WebSocket disconnect
+  const addAssistantRef = useRef<(text: string) => void>(() => {})
+  addAssistantRef.current = addAssistantMessage
   useEffect(() => {
     const interval = setInterval(() => {
       const lastAudio = lastAudioTimeRef.current
@@ -66,7 +82,7 @@ export default function App() {
         // No audio for 5 seconds — AI has finished, commit the text
         const text = llmTextAccumRef.current
         if (text) {
-          setMessages((prev) => [...prev, { role: 'assistant', text }])
+          addAssistantRef.current(text)
           addLog('recv', `AI回复完成 (${text.length}字) [超时提交]`)
           llmTextAccumRef.current = ''
           setPartialText('')
@@ -77,21 +93,6 @@ export default function App() {
     }, 1000)
     return () => clearInterval(interval)
   }, [addLog, finishStream])
-
-  // Restore persisted state on mount
-  useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem('dd_messages')
-      if (saved) {
-        const msgs = JSON.parse(saved)
-        setMessages(msgs)
-      }
-      const savedPartial = sessionStorage.getItem('dd_partial')
-      if (savedPartial) setPartialText(savedPartial)
-    } catch (e) {
-      console.error('[App] Failed to restore state:', e)
-    }
-  }, [])
 
   // Wire up lip-sync analyser
   useEffect(() => {
@@ -123,7 +124,7 @@ export default function App() {
             // 800ms cooldown: ignore VAD triggers right after response starts (echo guard)
             if (llmTextAccumRef.current && elapsed > 800) {
               const interrupted = llmTextAccumRef.current + ' [已打断]'
-              setMessages((prev) => [...prev, { role: 'assistant', text: interrupted }])
+              addAssistantMessage(interrupted)
               llmTextAccumRef.current = ''
               setPartialText('')
             }
@@ -132,7 +133,7 @@ export default function App() {
 
         case 'user_transcript':
           addLog('recv', `用户语音: "${msg.text}"`)
-          setMessages((prev) => [...prev, { role: 'user', text: msg.text }])
+          addUserMessage(msg.text)
           break
 
         case 'response_text_delta':
@@ -157,10 +158,7 @@ export default function App() {
           const finalText = llmTextAccumRef.current
           if (finalText) {
             console.log('[App] Adding final message to chat, text length:', finalText.length)
-            setMessages((prev) => {
-              console.log('[App] setMessages called, prev count:', prev.length, 'adding text length:', finalText.length)
-              return [...prev, { role: 'assistant', text: finalText }]
-            })
+            addAssistantMessage(finalText)
             addLog('recv', `AI回复完成 (${finalText.length}字)`)
           } else {
             console.log('[App] response_done but llmTextAccumRef is EMPTY — text already committed or lost!')
@@ -201,7 +199,8 @@ export default function App() {
   // ============================================================
   const sendTextMessage = useCallback(async (text: string) => {
     addLog('send', `发送文字: "${text.slice(0, 40)}..."`)
-    setMessages((prev) => [...prev, { role: 'user', text }])
+    ensureSession()
+    addUserMessage(text)
 
     try {
       const response = await fetch('/api/chat', {
@@ -251,7 +250,7 @@ export default function App() {
       }
 
       if (fullText) {
-        setMessages((prev) => [...prev, { role: 'assistant', text: fullText }])
+        addAssistantMessage(fullText)
         addLog('recv', `AI回复完成 (${fullText.length}字)`)
         setPartialText('')
       }
@@ -312,7 +311,7 @@ export default function App() {
     addLog('send', '发送 stop_conversation')
     setTimeout(() => {
       if (llmTextAccumRef.current) {
-        setMessages((prev) => [...prev, { role: 'assistant', text: llmTextAccumRef.current }])
+        addAssistantMessage(llmTextAccumRef.current)
         llmTextAccumRef.current = ''
         setPartialText('')
       }
@@ -505,6 +504,14 @@ export default function App() {
       </header>
 
       <main className="app-main">
+        <ChatSidebar
+          sessions={sessions}
+          currentSessionId={currentSessionId}
+          onSelectSession={(id) => {
+            switchToSession(id)
+          }}
+          onDeleteSession={deleteSession}
+        />
         {/* Primary: Text Chat */}
         <div className="chat-panel">
           <ChatInterface
