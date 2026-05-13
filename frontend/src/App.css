@@ -131,6 +131,7 @@ body {
   flex-direction: column;
   overflow: visible;
   min-height: 0;
+  position: relative;
 }
 
 .chat-panel {
@@ -1403,4 +1404,35 @@ body {
 .history-empty-sub {
   font-size: 13px;
   color: var(--text-muted);
+}
+
+/* ============================================================
+   New Session Button
+   ============================================================ */
+.new-session-btn {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--primary-gradient);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(224, 123, 80, 0.3);
+  transition: all 0.2s ease;
+}
+
+.new-session-btn:hover {
+  box-shadow: 0 6px 20px rgba(224, 123, 80, 0.4);
+  transform: translateY(-1px);
+}
+
+.new-session-btn:active {
+  transform: scale(0.94);
 }

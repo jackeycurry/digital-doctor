@@ -16,6 +16,7 @@ import { useChatSessions } from './hooks/useChatSessions'
 import type { ServerMessage } from './types'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import HistoryListPage from './pages/HistoryListPage'
 
 
 export default function App() {
@@ -50,6 +51,7 @@ export default function App() {
 
 const messages = currentSession?.messages ?? []
 
+const [activeNav, setActiveNav] = useState<'chat' | 'history'>('chat')
 const [partialText, setPartialText] = useState('')
   const [inCall, setInCall] = useState(false)
   const [callRecording, setCallRecording] = useState(true) // mic on/off state
@@ -443,6 +445,12 @@ const [partialText, setPartialText] = useState('')
   handleStopSpeakingRef.current = handleStopSpeaking
   handleAssistantMessageRef.current = handleAssistantMessage
 
+  // New session handler
+  const handleNewSession = useCallback(() => {
+    ensureSession()
+    setActiveNav('chat')
+  }, [ensureSession])
+
   // ============================================================
   // Render
   // ============================================================
@@ -504,41 +512,57 @@ const [partialText, setPartialText] = useState('')
       </header>
 
       <main className="app-main">
-        <ChatSidebar
-          sessions={sessions}
-          currentSessionId={currentSessionId}
-          onSelectSession={(id) => {
-            switchToSession(id)
-          }}
-          onDeleteSession={deleteSession}
-        />
-        {/* Primary: Text Chat */}
-        <div className="chat-panel">
-          <ChatInterface
-            messages={messages}
-            partialText={partialText}
-            onSendText={sendTextMessage}
-            onVoiceInput={() => {
-              if (stt.isRecording) {
-                stt.stop()
-              } else {
-                handleStopSpeakingRef.current()
-                stt.start()
-              }
+        <ChatSidebar activeNav={activeNav} onNavChange={setActiveNav} />
+
+        {activeNav === 'chat' ? (
+          <>
+            {/* 新建会话按钮 */}
+            <button className="new-session-btn" onClick={handleNewSession} title="新建会话">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+
+            {/* Chat Panel */}
+            <div className="chat-panel">
+              <ChatInterface
+                messages={messages}
+                partialText={partialText}
+                onSendText={sendTextMessage}
+                onVoiceInput={() => {
+                  if (stt.isRecording) {
+                    stt.stop()
+                  } else {
+                    handleStopSpeakingRef.current()
+                    stt.start()
+                  }
+                }}
+                isRecordingVoice={stt.isRecording}
+                onStopSpeaking={handleStopSpeakingRef.current}
+                onPerMsgSpeak={handlePerMsgSpeak}
+                speakingMsgIdx={speakingMsgIdx}
+              />
+            </div>
+
+            {/* 3D Doctor */}
+            <div className="doctor-compact">
+              <DigitalHuman blendShapes={blendShapes} compact />
+            </div>
+          </>
+        ) : (
+          <HistoryListPage
+            sessions={sessions}
+            currentSessionId={currentSessionId}
+            onSelectSession={(id) => {
+              switchToSession(id)
+              setActiveNav('chat')
             }}
-            isRecordingVoice={stt.isRecording}
-            onStopSpeaking={handleStopSpeakingRef.current}
-            onPerMsgSpeak={handlePerMsgSpeak}
-            speakingMsgIdx={speakingMsgIdx}
+            onDeleteSession={deleteSession}
           />
-        </div>
+        )}
 
-        {/* Desktop: 3D Doctor side panel */}
-        <div className="doctor-compact">
-          <DigitalHuman blendShapes={blendShapes} compact />
-        </div>
-
-        {/* Call control bar (shown during voice/video call) */}
+        {/* Call control bar */}
         {inCall && (
           <VideoCall
             stream={videoStream}
