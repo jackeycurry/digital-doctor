@@ -4,11 +4,44 @@ import { createServer } from 'node:http'
 import { WebSocketServer, WebSocket } from 'ws'
 import { config } from './config.js'
 import { handleConnection } from './wsHandler.js'
+import { register, login } from './auth.js'
 import CryptoJS from 'crypto-js'
 
 const app = express()
 app.use(cors())
 app.use(express.json({ limit: '10mb' }))
+
+// POST /api/register
+app.post('/api/register', async (req, res) => {
+  const { phone, password } = req.body as { phone?: string; password?: string }
+  if (!phone || !password) {
+    return res.status(400).json({ error: '手机号和密码不能为空' })
+  }
+  if (!/^1[3-9]\d{9}$/.test(phone)) {
+    return res.status(400).json({ error: '手机号格式不正确' })
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ error: '密码至少6位' })
+  }
+  const result = await register(phone, password)
+  if (!result.success) {
+    return res.status(409).json({ error: result.error })
+  }
+  res.json({ success: true })
+})
+
+// POST /api/login
+app.post('/api/login', async (req, res) => {
+  const { phone, password } = req.body as { phone?: string; password?: string }
+  if (!phone || !password) {
+    return res.status(400).json({ error: '手机号和密码不能为空' })
+  }
+  const result = await login(phone, password)
+  if (!result.success) {
+    return res.status(401).json({ error: result.error })
+  }
+  res.json({ token: result.token, phone: result.phone })
+})
 
 // Health check
 app.get('/health', (_req, res) => {
