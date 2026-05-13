@@ -46,6 +46,7 @@ export default function App() {
   addAssistantMessage,
   switchToSession,
   deleteSession,
+  createSession,
   ensureSession,
 } = useChatSessions()
 
@@ -447,9 +448,9 @@ const [partialText, setPartialText] = useState('')
 
   // New session handler
   const handleNewSession = useCallback(() => {
-    ensureSession()
+    createSession()
     setActiveNav('chat')
-  }, [ensureSession])
+  }, [createSession])
 
   // ============================================================
   // Render

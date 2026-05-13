@@ -1436,3 +1436,12 @@ body {
 .new-session-btn:active {
   transform: scale(0.94);
 }
+
+/* ============================================================
+   Mobile: hide nav sidebar
+   ============================================================ */
+@media (max-width: 767px) {
+  .nav-sidebar {
+    display: none;
+  }
+}
