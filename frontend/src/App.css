@@ -1312,3 +1312,12 @@ body {
   background: rgba(212, 114, 106, 0.15);
   color: var(--error);
 }
+
+/* ============================================================
+   Mobile: hide sidebar
+   ============================================================ */
+@media (max-width: 767px) {
+  .chat-sidebar {
+    display: none;
+  }
+}
