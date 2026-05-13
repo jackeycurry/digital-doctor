@@ -1,68 +1,44 @@
-import type { ChatSession } from '../types'
-
 interface ChatSidebarProps {
-  sessions: ChatSession[]
-  currentSessionId: string | null
-  onSelectSession: (id: string) => void
-  onDeleteSession: (id: string) => void
+  activeNav: 'chat' | 'history'
+  onNavChange: (nav: 'chat' | 'history') => void
 }
 
-function formatRelativeTime(timestamp: number): string {
-  const now = Date.now()
-  const diff = now - timestamp
-  const oneDay = 24 * 60 * 60 * 1000
-
-  if (diff < oneDay) {
-    return `今天 ${new Date(timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
-  } else if (diff < 2 * oneDay) {
-    return `昨天 ${new Date(timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
-  } else {
-    return new Date(timestamp).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
-  }
-}
-
-export default function ChatSidebar({
-  sessions,
-  currentSessionId,
-  onSelectSession,
-  onDeleteSession,
-}: ChatSidebarProps) {
+export default function ChatSidebar({ activeNav, onNavChange }: ChatSidebarProps) {
   return (
-    <aside className="chat-sidebar">
-      <div className="sidebar-header">
-        <span className="sidebar-title">历史记录</span>
+    <aside className="nav-sidebar">
+      <div className="nav-logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" fill="url(#grad)" />
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#f09668" />
+              <stop offset="100%" stopColor="#e07b50" />
+            </linearGradient>
+          </defs>
+          <path d="M12 6v6l4 2" stroke="white" strokeWidth="2" strokeLinecap="round" />
+        </svg>
       </div>
-      <div className="sidebar-list">
-        {sessions.length === 0 ? (
-          <div className="sidebar-empty">开始新的问诊吧</div>
-        ) : (
-          sessions.map((session) => (
-            <div
-              key={session.id}
-              className={`sidebar-item ${session.id === currentSessionId ? 'active' : ''}`}
-              onClick={() => onSelectSession(session.id)}
-            >
-              <div className="sidebar-item-content">
-                <div className="sidebar-item-time">{formatRelativeTime(session.updatedAt)}</div>
-                <div className="sidebar-item-title">{session.title || '新对话...'}</div>
-              </div>
-              <button
-                className="sidebar-item-delete"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onDeleteSession(session.id)
-                }}
-                aria-label="删除会话"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-          ))
-        )}
-      </div>
+      <nav className="nav-menu">
+        <button
+          className={`nav-item ${activeNav === 'chat' ? 'active' : ''}`}
+          onClick={() => onNavChange('chat')}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>AI咨询</span>
+        </button>
+        <button
+          className={`nav-item ${activeNav === 'history' ? 'active' : ''}`}
+          onClick={() => onNavChange('history')}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span>历史记录</span>
+        </button>
+      </nav>
     </aside>
   )
 }
