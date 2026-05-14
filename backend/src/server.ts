@@ -445,6 +445,37 @@ app.post('/api/chat', async (req, res) => {
     return
   }
 
+  // Authenticate and get phone
+  const auth = req.headers.authorization
+  if (!auth?.startsWith('Bearer ')) {
+    res.status(401).json({ error: 'Unauthorized' })
+    return
+  }
+  const phone = Buffer.from(auth.slice(7)).toString('utf-8').split(':')[0]
+
+  // Inject user profile context
+  const userProfile = getUserProfile(phone)
+  let profileContext = ''
+  if (userProfile) {
+    const calcAge = (y: number) => y ? (new Date().getFullYear() - y) : 0
+    const genderText = userProfile.gender === 'male' ? '男' : userProfile.gender === 'female' ? '女' : '其他'
+    const bloodTypeText = userProfile.bloodType === 'unknown' ? '未知' : `${userProfile.bloodType}型`
+    const allergyText = userProfile.allergies.length > 0
+      ? userProfile.allergies.map(a => `${a.allergen}（${a.severity === 'mild' ? '轻' : a.severity === 'moderate' ? '中' : '重'}度）`).join('、')
+      : '无'
+
+    profileContext = `
+用户健康档案：
+- 姓名：${userProfile.name || '未设置'}
+- 性别：${genderText}
+- 年龄：${calcAge(userProfile.birthYear) || '未知'}
+- 身高：${userProfile.height || '未知'}cm，体重：${userProfile.weight || '未知'}kg
+- 血型：${bloodTypeText}
+- 过敏史：${allergyText}
+- 备注：${userProfile.notes || '无'}
+`
+  }
+
   if (!config.dashscope.apiKey) {
     res.status(500).json({ error: 'API key not configured' })
     return
@@ -453,7 +484,7 @@ app.post('/api/chat', async (req, res) => {
   // System prompt for the doctor
   const systemMsg = {
     role: 'system',
-    content: '你是小云医生，一位经验丰富、态度温和的年轻女医生，由河南人工智能大健康研究院研发的AI智能体。用通俗易懂的语言解释医学问题，回复简洁生动（80-150字），每次回复结尾提1-2个引导性问题帮助患者更详细描述症状。不要给出明确的诊断或药方（务必提醒就医确诊）。遇到紧急症状立即建议拨打120。语气亲切、专业、像邻家医生。始终以中文回复。',
+    content: `你是小云医生，一位经验丰富、态度温和的年轻女医生，由河南人工智能大健康研究院研发的AI智能体。用通俗易懂的语言解释医学问题，回复简洁生动（80-150字），每次回复结尾提1-2个引导性问题帮助患者更详细描述症状。不要给出明确的诊断或药方（务必提醒就医确诊）。遇到紧急症状立即建议拨打120。语气亲切、专业、像邻家医生。始终以中文回复。${profileContext}`,
   }
 
   const body = {
