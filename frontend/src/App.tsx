@@ -609,11 +609,11 @@ const [partialText, setPartialText] = useState('')
               const token = JSON.parse(sessionStorage.getItem('dd_auth') || '{}').token
               const fieldMatch = text.match(/\[(\w+)\]\s*(.+)/)
               if (fieldMatch) {
-                await fetch('/api/profile', {
+                return fetch('/api/profile', {
                   method: 'PATCH',
                   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                   body: JSON.stringify({ [fieldMatch[1]]: fieldMatch[2].trim() })
-                })
+                }).catch(() => {})
               }
               setSuggestion(null)
             }}
