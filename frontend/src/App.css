@@ -104,6 +104,7 @@ body {
   align-items: center;
   gap: 10px;
   letter-spacing: -0.2px;
+  flex-shrink: 0;
 }
 
 .app-title::before {
@@ -115,6 +116,50 @@ body {
   background: var(--primary-gradient);
   box-shadow: 0 0 10px rgba(224, 123, 80, 0.4);
   animation: dotPulse 2s ease-in-out infinite;
+}
+
+/* Header actions — right side */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+/* FloatingCallButtons inside header: remove fixed positioning and drag */
+.header-actions .fab-wrapper {
+  display: contents;
+  position: static;
+  flex-direction: row;
+  bottom: auto;
+  right: auto;
+  left: auto;
+  top: auto;
+  z-index: auto;
+}
+
+.header-actions .fab-wrapper--static {
+  display: contents;
+  position: static;
+}
+
+.header-actions .fab-video {
+  width: 40px;
+  height: 40px;
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+}
+
+.header-actions .fab-video:hover:not(:disabled) {
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 6px 20px rgba(224, 123, 80, 0.4);
+}
+
+.header-actions .fab-video.active {
+  background: var(--error);
+  animation: fabPulse 1.5s ease-in-out infinite;
 }
 
 @keyframes dotPulse {
@@ -1202,6 +1247,7 @@ body {
   -webkit-backdrop-filter: var(--backdrop-blur);
   border-right: 1px solid var(--border);
   overflow: hidden;
+  min-height: 0;
 }
 
 .nav-logo {
@@ -1263,6 +1309,103 @@ body {
   height: 24px;
   background: var(--primary);
   border-radius: 0 2px 2px 0;
+}
+
+/* ============================================================
+   User Profile — Bottom of Sidebar
+   ============================================================ */
+.nav-user-profile {
+  margin-top: auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 14px;
+  background: rgba(255, 255, 255, 0.45);
+  border-top: 1px solid var(--border);
+  position: relative;
+}
+
+.nav-user-avatar {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.nav-user-avatar svg {
+  display: block;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(224, 123, 80, 0.25);
+}
+
+/* Online status dot */
+.nav-user-status {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--success);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 6px rgba(91, 158, 110, 0.6);
+  animation: statusPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(91, 158, 110, 0.4); }
+  50% { box-shadow: 0 0 8px rgba(91, 158, 110, 0.8); }
+}
+
+.nav-user-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-user-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.2px;
+}
+
+.nav-user-status-text {
+  font-size: 11px;
+  color: var(--success);
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* Logout button */
+.nav-logout-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.nav-logout-btn:hover {
+  background: rgba(212, 114, 106, 0.12);
+  color: var(--error);
+  border-radius: 8px;
+}
+
+.nav-logout-btn:active {
+  transform: scale(0.92);
 }
 
 /* ============================================================
@@ -1452,4 +1595,247 @@ body {
   .nav-sidebar {
     display: none;
   }
+}
+
+/* ProfilePage */
+.profile-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  overflow-y: auto;
+}
+
+.profile-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
+}
+
+.profile-summary-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(12px);
+}
+
+.profile-avatar { flex-shrink: 0; }
+
+.profile-summary-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-summary-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.profile-summary-detail {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+}
+
+.profile-section {
+  background: rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(12px);
+}
+
+.profile-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  margin: 0 0 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profile-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-field span {
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+}
+
+.profile-field input[type="text"],
+.profile-field input[type="number"],
+.profile-field select {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.profile-field input:focus,
+.profile-field select:focus {
+  border-color: rgba(255,255,255,0.3);
+}
+
+.profile-radio-group {
+  display: flex;
+  gap: 16px;
+}
+
+.profile-radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: rgba(255,255,255,0.8);
+}
+
+.profile-radio-group input[type="radio"] {
+  accent-color: #f09668;
+}
+
+.profile-notes {
+  width: 100%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 12px;
+  color: #fff;
+  font-size: 14px;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.profile-notes:focus {
+  border-color: rgba(255,255,255,0.3);
+}
+
+.profile-notes-count {
+  text-align: right;
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 4px;
+}
+
+.profile-save-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 24px;
+}
+
+.profile-saved-msg {
+  color: #6fdf85;
+  font-size: 14px;
+}
+
+.profile-save-btn {
+  background: linear-gradient(135deg, #f09668, #e07b50);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 28px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.profile-save-btn:hover { opacity: 0.9; }
+.profile-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* AllergyList */
+.allergy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.allergy-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.allergy-name-input {
+  flex: 1;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+}
+
+.allergy-name-input:focus { border-color: rgba(255,255,255,0.3); }
+
+.allergy-severity {
+  display: flex;
+  gap: 8px;
+}
+
+.allergy-severity label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+}
+
+.allergy-severity input[type="radio"] { accent-color: #f09668; }
+
+.allergy-remove-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.4);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.allergy-remove-btn:hover { color: #ff6b6b; }
+
+.allergy-add-btn {
+  background: none;
+  border: 1px dashed rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 8px;
+  color: rgba(255,255,255,0.5);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: flex-start;
+}
+
+.allergy-add-btn:hover {
+  border-color: rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.8);
 }
