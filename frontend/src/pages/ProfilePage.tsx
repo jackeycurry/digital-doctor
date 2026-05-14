@@ -29,6 +29,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   useEffect(() => {
     const savedAuth = sessionStorage.getItem('dd_auth')
@@ -54,11 +55,21 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     const savedAuth = sessionStorage.getItem('dd_auth')
-    if (!savedAuth) return
-    const token = JSON.parse(savedAuth).token
+    if (!savedAuth) {
+      setSaveError('请先登录')
+      return
+    }
+    let token: string
+    try {
+      token = JSON.parse(savedAuth).token
+    } catch {
+      setSaveError('登录信息解析失败，请重新登录')
+      return
+    }
 
     setSaving(true)
     setSaved(false)
+    setSaveError(null)
     try {
       const resp = await fetch('/api/profile', {
         method: 'PUT',
@@ -74,6 +85,7 @@ export default function ProfilePage() {
       }
     } catch (err) {
       console.error(err)
+      setSaveError('保存失败，请稍后重试')
     } finally {
       setSaving(false)
     }
@@ -127,7 +139,7 @@ export default function ProfilePage() {
             <input
               type="number"
               value={profile.birthYear || ''}
-              onChange={(e) => setProfile({ ...profile, birthYear: parseInt(e.target.value) || 0 })}
+              onChange={(e) => setProfile({ ...profile, birthYear: parseInt(e.target.value, 10) || 0 })}
               placeholder="如：1990"
               min="1900"
               max="2099"
@@ -138,7 +150,7 @@ export default function ProfilePage() {
             <input
               type="number"
               value={profile.height || ''}
-              onChange={(e) => setProfile({ ...profile, height: parseInt(e.target.value) || 0 })}
+              onChange={(e) => setProfile({ ...profile, height: parseInt(e.target.value, 10) || 0 })}
               placeholder="如：175"
               min="50"
               max="250"
@@ -149,7 +161,7 @@ export default function ProfilePage() {
             <input
               type="number"
               value={profile.weight || ''}
-              onChange={(e) => setProfile({ ...profile, weight: parseInt(e.target.value) || 0 })}
+              onChange={(e) => setProfile({ ...profile, weight: parseInt(e.target.value, 10) || 0 })}
               placeholder="如：70"
               min="20"
               max="300"
@@ -194,6 +206,7 @@ export default function ProfilePage() {
 
       <div className="profile-save-row">
         {saved && <span className="profile-saved-msg">已保存</span>}
+        {saveError && <span className="profile-error-msg">{saveError}</span>}
         <button className="profile-save-btn" onClick={handleSave} disabled={saving}>
           {saving ? '保存中...' : '保存档案'}
         </button>
