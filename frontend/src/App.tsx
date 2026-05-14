@@ -17,6 +17,7 @@ import type { ServerMessage } from './types'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import HistoryListPage from './pages/HistoryListPage'
+import ProfilePage from './pages/ProfilePage'
 
 
 export default function App() {
@@ -52,7 +53,7 @@ export default function App() {
 
 const messages = currentSession?.messages ?? []
 
-const [activeNav, setActiveNav] = useState<'chat' | 'history'>('chat')
+const [activeNav, setActiveNav] = useState<'chat' | 'history' | 'profile'>('chat')
 const [partialText, setPartialText] = useState('')
   const [inCall, setInCall] = useState(false)
   const [callRecording, setCallRecording] = useState(true) // mic on/off state
@@ -509,28 +510,30 @@ const [partialText, setPartialText] = useState('')
     <div className="app">
       <header className="app-header">
         <h1 className="app-title">小云医生 · AI健康助手</h1>
-        <StatusIndicator state={state} connected={connected} />
+        <div className="header-actions">
+          <FloatingCallButtons
+            state={state}
+            connected={connected}
+            inCall={inCall}
+            onStartCall={() => handleStartCall('video')}
+            staticPosition
+          />
+          <button className="new-session-btn" onClick={handleNewSession} title="新建会话">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+          <StatusIndicator state={state} connected={connected} />
+        </div>
       </header>
 
       <main className="app-main">
         <ChatSidebar activeNav={activeNav} onNavChange={setActiveNav} />
 
-        {activeNav === 'chat' ? (
+        {activeNav === 'chat' && (
           <>
-            <div className="chat-top-bar">
-              <button className="new-session-btn" onClick={handleNewSession} title="新建会话">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="12" y1="5" x2="12" y2="19"/>
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-              </button>
-              <FloatingCallButtons
-                state={state}
-                connected={connected}
-                inCall={inCall}
-                onStartCall={() => handleStartCall('video')}
-              />
-            </div>
+            <div className="chat-top-bar" />
 
             {/* Chat Panel */}
             <div className="chat-panel">
@@ -558,7 +561,13 @@ const [partialText, setPartialText] = useState('')
               <DigitalHuman blendShapes={blendShapes} compact />
             </div>
           </>
-        ) : (
+        )}
+
+        {activeNav === 'profile' && (
+          <ProfilePage />
+        )}
+
+        {activeNav === 'history' && (
           <HistoryListPage
             sessions={sessions}
             currentSessionId={currentSessionId}
