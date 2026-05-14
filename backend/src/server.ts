@@ -7,6 +7,9 @@ import { handleConnection } from './wsHandler.js'
 import { register, login, getUserProfile, updateUserProfile, patchUserProfile } from './auth.js'
 import CryptoJS from 'crypto-js'
 
+// In-memory suggestion store: phone -> suggestion text
+const suggestionStore = new Map<string, string>()
+
 const app = express()
 app.use(cors())
 app.use(express.json({ limit: '10mb' }))
@@ -82,6 +85,14 @@ app.put('/api/profile', authenticate, (req, res) => {
 app.patch('/api/profile', authenticate, (req, res) => {
   const profile = patchUserProfile((req as any).phone, req.body)
   res.json({ profile })
+})
+
+// GET /api/profile/suggestions
+app.get('/api/profile/suggestions', authenticate, (req, res) => {
+  const phone = (req as any).phone
+  const suggestion = suggestionStore.get(phone) ?? null
+  suggestionStore.delete(phone) // clear after delivered
+  res.json({ suggestion })
 })
 
 // Health check
@@ -560,6 +571,48 @@ app.post('/api/chat', async (req, res) => {
 
     res.write('data: [DONE]\n\n')
     res.end()
+
+    // After SSE stream ends, generate profile update suggestions
+    if (userProfile) {
+      const suggestionPrompt = `你是小云医生的健康档案助手。用户刚刚结束了一次问诊。
+当前档案：
+姓名：${userProfile.name || '未设置'}
+性别：${userProfile.gender === 'male' ? '男' : userProfile.gender === 'female' ? '女' : '其他'}
+过敏史：${userProfile.allergies.length > 0 ? userProfile.allergies.map(a => a.allergen).join('、') : '无'}
+备注：${userProfile.notes || '无'}
+
+本次问诊内容：
+${messages.map((m: { role: string; content: string }) => `${m.role === 'user' ? '用户' : 'AI'}：${m.content}`).join('\n')}
+
+请判断：本次问诊中用户是否透露了重要的、尚未记录在档案中的健康相关信息（如生活习惯、症状描述、用药情况等）？
+如果没有任何值得更新建议的内容，回复"无建议"。
+如果有关键信息，列出1-3条具体更新建议，每条格式：[字段名] 建议内容
+
+只输出建议或"无建议"，不要解释。`
+
+      fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.dashscope.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'qwen-plus',
+          messages: [{ role: 'user', content: suggestionPrompt }],
+          max_tokens: 200,
+        }),
+      }).then(suggestionRes => {
+        if (!suggestionRes.ok) return
+        return suggestionRes.json()
+      }).then(data => {
+        const text = data?.choices?.[0]?.message?.content?.trim()
+        if (text && text !== '无建议') {
+          suggestionStore.set(phone, text)
+        }
+      }).catch(() => {
+        // Silently fail — suggestions are non-critical
+      })
+    }
   } catch (err) {
     console.error('[Chat] Error:', err)
     if (!res.headersSent) {
