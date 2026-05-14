@@ -4,7 +4,7 @@ import { createServer } from 'node:http'
 import { WebSocketServer, WebSocket } from 'ws'
 import { config } from './config.js'
 import { handleConnection } from './wsHandler.js'
-import { register, login } from './auth.js'
+import { register, login, getUserProfile, updateUserProfile, patchUserProfile } from './auth.js'
 import CryptoJS from 'crypto-js'
 
 const app = express()
@@ -41,6 +41,47 @@ app.post('/api/login', async (req, res) => {
     return res.status(401).json({ error: result.error })
   }
   res.json({ token: result.token, phone: result.phone })
+})
+
+// Middleware: authenticate token from Authorization header
+function authenticate(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const auth = req.headers.authorization
+  if (!auth?.startsWith('Bearer ')) {
+    res.status(401).json({ error: 'Unauthorized' })
+    return
+  }
+  const token = auth.slice(7)
+  try {
+    const decoded = Buffer.from(token).toString('utf-8')
+    const phone = decoded.split(':')[0]
+    ;(req as any).phone = phone
+    next()
+  } catch {
+    res.status(401).json({ error: 'Invalid token' })
+  }
+}
+
+// GET /api/profile
+app.get('/api/profile', authenticate, (req, res) => {
+  const profile = getUserProfile((req as any).phone)
+  res.json({ profile })
+})
+
+// PUT /api/profile
+app.put('/api/profile', authenticate, (req, res) => {
+  const { name, gender, birthYear, height, weight, bloodType, allergies, notes } = req.body
+  if (name === undefined || gender === undefined) {
+    res.status(400).json({ error: 'name and gender are required' })
+    return
+  }
+  const profile = updateUserProfile((req as any).phone, { name, gender, birthYear, height, weight, bloodType, allergies, notes })
+  res.json({ profile })
+})
+
+// PATCH /api/profile
+app.patch('/api/profile', authenticate, (req, res) => {
+  const profile = patchUserProfile((req as any).phone, req.body)
+  res.json({ profile })
 })
 
 // Health check
