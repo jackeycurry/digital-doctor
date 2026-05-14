@@ -1,3 +1,26 @@
+export interface Allergy {
+  allergen: string
+  severity: 'mild' | 'moderate' | 'severe'
+}
+
+export interface UserProfile {
+  name: string
+  gender: 'male' | 'female' | 'other'
+  birthYear: number
+  height: number
+  weight: number
+  bloodType: 'A' | 'B' | 'AB' | 'O' | 'unknown'
+  allergies: Allergy[]
+  notes: string
+}
+
+export interface User {
+  phone: string
+  passwordHash: string
+  createdAt: string
+  profile: UserProfile | null
+}
+
 export type ClientMessage =
   | { type: 'start_conversation' }
   | { type: 'stop_conversation' }
