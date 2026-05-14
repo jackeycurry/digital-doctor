@@ -82,6 +82,8 @@ export default function ProfilePage() {
       if (resp.ok) {
         setSaved(true)
         setTimeout(() => setSaved(false), 3000)
+      } else {
+        setSaveError('保存失败，请稍后重试')
       }
     } catch (err) {
       console.error(err)
