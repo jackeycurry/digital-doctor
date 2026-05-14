@@ -613,7 +613,7 @@ const [partialText, setPartialText] = useState('')
                   method: 'PATCH',
                   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                   body: JSON.stringify({ [fieldMatch[1]]: fieldMatch[2].trim() })
-                }).catch(() => {})
+                }).catch(() => {}).finally(() => setSuggestion(null))
               }
               setSuggestion(null)
             }}
