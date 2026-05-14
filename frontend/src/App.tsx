@@ -18,6 +18,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import HistoryListPage from './pages/HistoryListPage'
 import ProfilePage from './pages/ProfilePage'
+import ProfileSuggestionPanel from './components/ProfileSuggestionPanel'
 
 
 export default function App() {
@@ -54,6 +55,7 @@ export default function App() {
 const messages = currentSession?.messages ?? []
 
 const [activeNav, setActiveNav] = useState<'chat' | 'history' | 'profile'>('chat')
+  const [suggestion, setSuggestion] = useState<string | null>(null)
 const [partialText, setPartialText] = useState('')
   const [inCall, setInCall] = useState(false)
   const [callRecording, setCallRecording] = useState(true) // mic on/off state
@@ -170,6 +172,16 @@ const [partialText, setPartialText] = useState('')
           llmTextAccumRef.current = ''
           setPartialText('')
           finishStream()
+          // Fetch AI suggestion after response done
+          const authData = sessionStorage.getItem('dd_auth')
+          if (authData) {
+            const token = JSON.parse(authData).token
+            fetch('/api/profile/suggestions', {
+              headers: { Authorization: `Bearer ${token}` }
+            }).then(r => r.json()).then(data => {
+              if (data.suggestion) setSuggestion(data.suggestion)
+            }).catch(() => {})
+          }
           break
 
         case 'response_audio_delta':
@@ -587,6 +599,25 @@ const [partialText, setPartialText] = useState('')
             onFrame={handleVideoFrame}
             isRecording={callRecording}
             onToggleMic={handleToggleMic}
+          />
+        )}
+
+        {suggestion && (
+          <ProfileSuggestionPanel
+            suggestion={suggestion}
+            onApply={async (text) => {
+              const token = JSON.parse(sessionStorage.getItem('dd_auth') || '{}').token
+              const fieldMatch = text.match(/\[(\w+)\]\s*(.+)/)
+              if (fieldMatch) {
+                await fetch('/api/profile', {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                  body: JSON.stringify({ [fieldMatch[1]]: fieldMatch[2].trim() })
+                })
+              }
+              setSuggestion(null)
+            }}
+            onDismiss={() => setSuggestion(null)}
           />
         )}
       </main>{/* Log panel temporarily hidden */}

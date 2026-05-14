@@ -1839,3 +1839,80 @@ body {
   border-color: rgba(255,255,255,0.4);
   color: rgba(255,255,255,0.8);
 }
+
+/* ProfileSuggestionPanel */
+.suggestion-panel {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 300px;
+  background: rgba(20, 20, 30, 0.95);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 16px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  z-index: 1000;
+}
+
+.suggestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: #fff;
+  font-size: 14px;
+}
+
+.suggestion-close {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.suggestion-body { margin-bottom: 16px; }
+
+.suggestion-text {
+  font-size: 13px;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.suggestion-actions { display: flex; gap: 8px; }
+
+.suggestion-apply-btn {
+  flex: 1;
+  background: linear-gradient(135deg, #f09668, #e07b50);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.suggestion-apply-btn:hover { opacity: 0.9; }
+.suggestion-apply-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.suggestion-dismiss-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.suggestion-dismiss-btn:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
