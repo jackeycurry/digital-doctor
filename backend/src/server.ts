@@ -77,14 +77,22 @@ app.put('/api/profile', authenticate, (req, res) => {
     res.status(400).json({ error: 'name and gender are required' })
     return
   }
-  const profile = updateUserProfile((req as any).phone, { name, gender, birthYear, height, weight, bloodType, allergies, notes })
-  res.json({ profile })
+  try {
+    const profile = updateUserProfile((req as any).phone, { name, gender, birthYear, height, weight, bloodType, allergies, notes })
+    res.json({ profile })
+  } catch (err) {
+    res.status(404).json({ error: (err as Error).message })
+  }
 })
 
 // PATCH /api/profile
 app.patch('/api/profile', authenticate, (req, res) => {
-  const profile = patchUserProfile((req as any).phone, req.body)
-  res.json({ profile })
+  try {
+    const profile = patchUserProfile((req as any).phone, req.body)
+    res.json({ profile })
+  } catch (err) {
+    res.status(404).json({ error: (err as Error).message })
+  }
 })
 
 // GET /api/profile/suggestions
@@ -603,7 +611,7 @@ ${messages.map((m: { role: string; content: string }) => `${m.role === 'user' ? 
         }),
       }).then(suggestionRes => {
         if (!suggestionRes.ok) return
-        return suggestionRes.json()
+        return suggestionRes.json() as Promise<{ choices?: { message?: { content?: string } }[] }>
       }).then(data => {
         const text = data?.choices?.[0]?.message?.content?.trim()
         if (text && text !== '无建议') {
