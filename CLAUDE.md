@@ -48,18 +48,28 @@ cd backend && npm run build  # 后端 TypeScript 编译
 ## 关键源文件
 
 ### 后端 (`backend/src/`)
-- `server.ts` — HTTP 服务器、REST 端点 (`/api/chat`, `/api/tts`, `/api/stt`)、WebSocket 升级
+- `server.ts` — HTTP 服务器、REST 端点、WebSocket 升级
 - `wsHandler.ts` — WebSocket 连接处理，消息路由到 RealtimeSession
 - `services/realtime.ts` — 百炼 Realtime API WebSocket 客户端（语音/视频）
 - `config.ts` — 环境变量读取（端口、API keys）
+- `auth.ts` — 用户注册/登录（`/api/register`, `/api/login`），JWT token
 
 ### 前端 (`frontend/src/`)
-- `App.tsx` — 主组件，WebSocket 消息处理、状态编排
+- `App.tsx` — 主组件，路由（login/register/main）、WebSocket 消息处理、状态编排
 - `components/DigitalHuman.tsx` — 3D 数字人渲染（GLB 模型 + 程序化备用）
 - `components/ChatInterface.tsx` — 文字聊天面板，SSE 流式
+- `components/ChatSidebar.tsx` — 导航侧边栏（聊天/历史记录切换）
+- `components/FloatingCallButtons.tsx` — 可拖动悬浮通话按钮
+- `components/VideoCall.tsx` — 通话中摄像头覆盖层
+- `pages/LoginPage.tsx` — 手机号+密码登录
+- `pages/RegisterPage.tsx` — 手机号+密码注册
+- `pages/HistoryListPage.tsx` — 历史会话列表
+- `pages/VideoCallPage.tsx` — 视频问诊全屏页面
 - `hooks/useWebSocket.ts` — WebSocket 连接管理
 - `hooks/useAudioCapture.ts` — 麦克风 PCM 采集（AudioWorklet）
 - `hooks/useStreamingAudio.ts` — 音频流播放队列（带 analyser node）
+- `hooks/useStt.ts` — 语音转文字（百炼 Paraformer）
+- `hooks/useChatSessions.ts` — 多会话状态管理
 - `utils/lipSync.ts` — Blend shape 权重计算（从音频频率驱动唇形）
 
 ## API 端点

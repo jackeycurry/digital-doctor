@@ -57,8 +57,20 @@ export default function LoginPage({ onLogin, onGoRegister }: Props) {
 
   return (
     <div className="auth-page">
+      {/* Floating background orbs */}
+      <div className="auth-orb auth-orb--top" />
+      <div className="auth-orb auth-orb--bottom" />
+
       <div className="auth-card">
-        <h1 className="auth-title">小云医生 · AI健康助手</h1>
+        {/* Icon */}
+        <div className="auth-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+
+        <h1 className="auth-title">小云医生</h1>
+        <p className="auth-subtitle">您的 AI 健康助手，随时为您服务</p>
 
         {isRegistered && (
           <div className="auth-success">注册成功，请登录</div>
@@ -108,7 +120,8 @@ export default function LoginPage({ onLogin, onGoRegister }: Props) {
         </form>
 
         <div className="auth-footer">
-          还没有账号？<button className="auth-link" onClick={onGoRegister}>立即注册 →</button>
+          还没有账号？
+          <button className="auth-link" onClick={onGoRegister}>立即注册</button>
         </div>
       </div>
     </div>

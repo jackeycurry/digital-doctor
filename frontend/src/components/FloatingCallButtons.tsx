@@ -6,6 +6,7 @@ interface FloatingCallButtonsProps {
   connected: boolean
   inCall: boolean
   onStartCall: () => void
+  staticPosition?: boolean
 }
 
 const DRAG_THRESHOLD = 4
@@ -15,6 +16,7 @@ export default function FloatingCallButtons({
   connected,
   inCall,
   onStartCall,
+  staticPosition,
 }: FloatingCallButtonsProps) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const [pos, setPos] = useState({ x: 0, y: 0 })
@@ -75,29 +77,35 @@ export default function FloatingCallButtons({
   return (
     <div
       ref={wrapperRef}
-      className="fab-wrapper"
-      style={{
-        position: 'fixed',
-        left: pos.x || undefined,
-        top: pos.y || undefined,
-      }}
+      className={`fab-wrapper${staticPosition ? ' fab-wrapper--static' : ''}`}
+      style={
+        staticPosition
+          ? undefined
+          : {
+              position: 'fixed',
+              left: pos.x || undefined,
+              top: pos.y || undefined,
+            }
+      }
     >
       {/* Drag handle — visible grab point for repositioning */}
-      <div
-        className="fab-drag-handle"
-        onPointerDown={handleDragStart}
-        title="拖动移动位置"
-      >
-        <span className="drag-dots">
-          <i /><i /><i />
-        </span>
-      </div>
+      {!staticPosition && (
+        <div
+          className="fab-drag-handle"
+          onPointerDown={handleDragStart}
+          title="拖动移动位置"
+        >
+          <span className="drag-dots">
+            <i /><i /><i />
+          </span>
+        </div>
+      )}
 
       {/* Video call button */}
       <button
         className="fab fab-video"
         onClick={() => {
-          if (movedRef.current) { movedRef.current = false; return }
+          if (!staticPosition && movedRef.current) { movedRef.current = false; return }
           onStartCall()
         }}
         aria-label="视频通话"

@@ -123,7 +123,7 @@ export default function ProfilePage() {
           <label className="profile-field">
             <span>性别</span>
             <div className="profile-radio-group">
-              {(['male', 'female', 'other'] as const).map(g => (
+              {(['male', 'female'] as const).map(g => (
                 <label key={g}>
                   <input
                     type="radio"
@@ -131,7 +131,7 @@ export default function ProfilePage() {
                     checked={profile.gender === g}
                     onChange={() => setProfile({ ...profile, gender: g })}
                   />
-                  {g === 'male' ? '男' : g === 'female' ? '女' : '其他'}
+                  {g === 'male' ? '男' : '女'}
                 </label>
               ))}
             </div>

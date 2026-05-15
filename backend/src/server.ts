@@ -55,7 +55,7 @@ function authenticate(req: express.Request, res: express.Response, next: express
   }
   const token = auth.slice(7)
   try {
-    const decoded = Buffer.from(token).toString('utf-8')
+    const decoded = Buffer.from(token, 'base64').toString('utf-8')
     const phone = decoded.split(':')[0]
     ;(req as any).phone = phone
     next()

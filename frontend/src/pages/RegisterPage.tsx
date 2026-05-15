@@ -49,6 +49,9 @@ export default function RegisterPage({ onSuccess, onBack }: Props) {
 
   return (
     <div className="auth-page">
+      <div className="auth-orb auth-orb--top" />
+      <div className="auth-orb auth-orb--bottom" />
+
       <div className="auth-card">
         <button className="auth-back" onClick={onBack}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>

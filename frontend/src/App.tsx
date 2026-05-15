@@ -213,20 +213,36 @@ const [partialText, setPartialText] = useState('')
   // ============================================================
   // Text chat
   // ============================================================
+  // Track the session ID for the current text message to avoid closure race conditions
+  const currentSessionIdRef = useRef<string | null>(null)
+
+  // sendTextMessage passes sessionId to avoid double ensureSession race
   const sendTextMessage = useCallback(async (text: string) => {
     addLog('send', `发送文字: "${text.slice(0, 40)}..."`)
-    ensureSession()
-    addUserMessage(text)
+    // Capture the session ID synchronously before any async operations
+    const sessionId = ensureSession()
+    currentSessionIdRef.current = sessionId
+    addUserMessage(text, sessionId)
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [
-            ...messages.map((m) => ({ role: m.role, content: m.text })),
-            { role: 'user', content: text },
-          ],
+      const savedAuth = sessionStorage.getItem('dd_auth')
+    const token = savedAuth ? JSON.parse(savedAuth).token : ''
+    // Use ref to get the correct session ID, avoiding stale closure issues
+    const activeSessionId = currentSessionIdRef.current
+    // Find the messages for the session at send time (not during response)
+    const sessionAtSendTime = sessions.find(s => s.id === activeSessionId)
+    const messagesAtSendTime = sessionAtSendTime?.messages ?? []
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({
+        messages: [
+          ...messagesAtSendTime.map((m) => ({ role: m.role, content: m.text })),
+          { role: 'user', content: text },
+        ],
         }),
       })
 
@@ -266,14 +282,14 @@ const [partialText, setPartialText] = useState('')
       }
 
       if (fullText) {
-        addAssistantMessage(fullText)
+        addAssistantMessage(fullText, currentSessionIdRef.current)
         addLog('recv', `AI回复完成 (${fullText.length}字)`)
         setPartialText('')
       }
     } catch (err) {
       addLog('error', `文字发送失败: ${String(err)}`)
     }
-  }, [messages, addLog])
+  }, [sessions, addLog])
 
   // Keep ref in sync for speech-to-text callback
   sendTextRef.current = sendTextMessage

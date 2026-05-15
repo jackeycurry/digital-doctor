@@ -59,26 +59,26 @@ export function useChatSessions() {
     return createSession()
   }, [currentSessionId, sessions, createSession])
 
-  // 添加用户消息
-  const addUserMessage = useCallback((text: string) => {
-    const sessionId = ensureSession()
+  // 添加用户消息（sessionId 可选，用于避免 ensureSession 重复调用）
+  const addUserMessage = useCallback((text: string, sessionId?: string) => {
+    const sid = sessionId ?? ensureSession()
     const msg: ChatMessage = { role: 'user', text }
     setSessions((prev) =>
       prev.map((s) =>
-        s.id === sessionId
+        s.id === sid
           ? { ...s, messages: [...s.messages, msg], updatedAt: Date.now() }
           : s
       )
     )
   }, [ensureSession])
 
-  // 添加 AI 回复（同时生成 title）
-  const addAssistantMessage = useCallback((text: string) => {
-    const sessionId = ensureSession()
+  // 添加 AI 回复（同时生成 title，sessionId 可选）
+  const addAssistantMessage = useCallback((text: string, sessionId?: string) => {
+    const sid = sessionId ?? ensureSession()
     const msg: ChatMessage = { role: 'assistant', text }
     setSessions((prev) =>
       prev.map((s) => {
-        if (s.id !== sessionId) return s
+        if (s.id !== sid) return s
         // 如果还没有 title，从 AI 回复提取
         const title = s.title || extractTitleFromAIResponse(text)
         return { ...s, messages: [...s.messages, msg], title, updatedAt: Date.now() }
@@ -107,6 +107,7 @@ export function useChatSessions() {
     addAssistantMessage,
     switchToSession,
     deleteSession,
+    createSession,
     ensureSession,
   }
 }

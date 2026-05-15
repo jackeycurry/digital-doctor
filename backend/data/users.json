@@ -1,1 +1,37 @@
-[]
+[
+  {
+    "phone": "13800138000",
+    "passwordHash": "$2b$10$RXBmJixJt136Cs1YPyG8gOUZbmtNDiIfh6Uweu8SY/vt0kxrRbIC6",
+    "createdAt": "2026-05-13T01:54:55.252Z",
+    "profile": {
+      "name": "����",
+      "gender": "male",
+      "birthYear": 1990,
+      "height": 170,
+      "weight": 65,
+      "bloodType": "A",
+      "allergies": [],
+      "notes": ""
+    }
+  },
+  {
+    "phone": "15838986492",
+    "passwordHash": "$2b$10$IHBg5YseAyQG.r6FyEyOiuMiME..IOCu72vDq7lOrXoHCczXG0upu",
+    "createdAt": "2026-05-13T03:14:35.803Z",
+    "profile": {
+      "name": "王友杰",
+      "gender": "male",
+      "birthYear": 2003,
+      "height": 170,
+      "weight": 75,
+      "bloodType": "unknown",
+      "allergies": [
+        {
+          "allergen": "金属",
+          "severity": "moderate"
+        }
+      ],
+      "notes": "test"
+    }
+  }
+]
